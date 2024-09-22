@@ -8,13 +8,19 @@ class QuotesSpider(scrapy.Spider):
     allowed_domains = ["quotes.toscrape.com"]
 
     def start_requests(self):
-        url = "https://quotes.toscrape.com/js/"
+        url = "https://quotes.toscrape.com/scroll"
         yield scrapy.Request(
             url,
             meta=dict(
                 playwright=True,
                 playwright_include_page=True,
-                playwright_page_methods=[PageMethod("wait_for_selector", "div.quote")],
+                playwright_page_methods=[
+                    PageMethod("wait_for_selector", "div.quote"),
+                    PageMethod(
+                        "evaluate", "window.scrollBy(0, document.body.scrollHeight)"
+                    ),
+                    PageMethod("wait_for_selector", "div.quote:nth-child(11)"),
+                ],
             ),
             errback=self.errback,
         )
@@ -32,20 +38,20 @@ class QuotesSpider(scrapy.Spider):
             yield quote_item
 
         self.log("Saved all quotes")
-        next_page = response.css("li.next a::attr(href)").get()
-        if next_page is not None:
-            next_page_url = "https://quotes.toscrape.com" + next_page
-            yield scrapy.Request(
-                next_page_url,
-                meta=dict(
-                    playwright=True,
-                    playwright_include_page=True,
-                    playwright_page_methods=[
-                        PageMethod("wait_for_selector", "div.quote")
-                    ],
-                ),
-                errback=self.errback,
-            )
+        # next_page = response.css("li.next a::attr(href)").get()
+        # if next_page is not None:
+        #     next_page_url = "https://quotes.toscrape.com" + next_page
+        #     yield scrapy.Request(
+        #         next_page_url,
+        #         meta=dict(
+        #             playwright=True,
+        #             playwright_include_page=True,
+        #             playwright_page_methods=[
+        #                 PageMethod("wait_for_selector", "div.quote")
+        #             ],
+        #         ),
+        #         errback=self.errback,
+        #     )
 
     async def errback(self, failure):
         self.logger.error(f"Failed to load page: {failure}")
