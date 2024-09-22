@@ -16,10 +16,10 @@ class QuotesSpider(scrapy.Spider):
                 playwright_include_page=True,
                 playwright_page_methods=[
                     PageMethod("wait_for_selector", "div.quote"),
-                    PageMethod(
-                        "evaluate", "window.scrollBy(0, document.body.scrollHeight)"
-                    ),
-                    PageMethod("wait_for_selector", "div.quote:nth-child(11)"),
+                    # PageMethod(
+                    #     "evaluate", "window.scrollBy(0, document.body.scrollHeight)"
+                    # ),
+                    # PageMethod("wait_for_selector", "div.quote:nth-child(11)"),
                 ],
             ),
             errback=self.errback,
@@ -29,15 +29,15 @@ class QuotesSpider(scrapy.Spider):
         page = response.meta["playwright_page"]
         await page.close()
 
-        for quote in response.css("div.quote"):
-            quote_item = QuoteItem()
-            quote_item["text"] = quote.css("span.text::text").get()
-            quote_item["author"] = quote.css("small.author::text").get()
-            quote_item["tags"] = quote.css("div.tags a.tag::text").getall()
-            self.logger.info(f"Quote: {quote_item}")
-            yield quote_item
+        # for quote in response.css("div.quote"):
+        #     quote_item = QuoteItem()
+        #     quote_item["text"] = quote.css("span.text::text").get()
+        #     quote_item["author"] = quote.css("small.author::text").get()
+        #     quote_item["tags"] = quote.css("div.tags a.tag::text").getall()
+        #     self.logger.info(f"Quote: {quote_item}")
+        #     yield quote_item
 
-        self.log("Saved all quotes")
+        # self.log("Saved all quotes")
         # next_page = response.css("li.next a::attr(href)").get()
         # if next_page is not None:
         #     next_page_url = "https://quotes.toscrape.com" + next_page
